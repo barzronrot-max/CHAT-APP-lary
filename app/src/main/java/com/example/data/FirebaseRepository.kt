@@ -15,6 +15,9 @@ import com.example.data.model.ChatSummary
 import com.example.data.model.ChatWithPeer
 import com.example.data.model.LastMessageInfo
 import com.example.data.model.UserProfile
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -295,6 +298,15 @@ object FirebaseRepository {
 
     fun registerFcmToken(uid: String) {
         try {
+            val app = FirebaseApp.getInstance()
+            val context = app.applicationContext
+            val availability = GoogleApiAvailability.getInstance()
+            val resultCode = availability.isGooglePlayServicesAvailable(context)
+            if (resultCode != ConnectionResult.SUCCESS) {
+                Log.d(TAG, "Google Play Services not available for FCM ($resultCode). Skipping FCM registration.")
+                return
+            }
+
             FirebaseMessaging.getInstance().token
                 .addOnSuccessListener { token ->
                     if (!token.isNullOrBlank()) {
@@ -309,10 +321,10 @@ object FirebaseRepository {
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.w(TAG, "FCM token registration skipped or failed: ${e.message}")
+                    Log.d(TAG, "FCM token registration skipped or failed: ${e.message}")
                 }
-        } catch (e: Exception) {
-            Log.w(TAG, "FirebaseMessaging not available: ${e.message}")
+        } catch (e: Throwable) {
+            Log.d(TAG, "FirebaseMessaging not available: ${e.message}")
         }
     }
 

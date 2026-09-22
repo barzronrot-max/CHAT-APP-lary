@@ -34,6 +34,13 @@ class ChatLeryyyApp : Application() {
                 FirebaseApp.initializeApp(this, options)
                 Log.d("ChatLeryyyApp", "Firebase initialized with Android configuration")
             }
+            // Explicitly ensure FCM auto-init and background sync are disabled on startup
+            try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().isAutoInitEnabled = false
+            } catch (e: Throwable) {
+                Log.d("ChatLeryyyApp", "FCM auto init configuration skipped: ${e.message}")
+            }
+
             // Enable offline persistence for RTDB if desired
             val db = FirebaseDatabase.getInstance("https://chat-leryyy-default-rtdb.asia-southeast1.firebasedatabase.app")
             try {

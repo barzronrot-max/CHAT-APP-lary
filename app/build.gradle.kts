@@ -136,3 +136,40 @@ dependencies {
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
 }
+
+abstract class CopyDebugApkTask : DefaultTask() {
+  @get:InputFile
+  abstract val sourceApk: RegularFileProperty
+
+  @get:OutputFile
+  abstract val destinationApk: RegularFileProperty
+
+  @TaskAction
+  fun copyApk() {
+    val src = sourceApk.get().asFile
+    val dest = destinationApk.get().asFile
+
+    var attempts = 0
+    while ((!src.exists() || src.length() == 0L) && attempts < 10) {
+      Thread.sleep(500)
+      attempts++
+    }
+
+    if (src.exists() && src.length() > 0L) {
+      src.copyTo(dest, overwrite = true)
+      logger.lifecycle("Successfully copied ${src.name} (${src.length()} bytes) to ${dest.name}")
+    } else {
+      throw GradleException("Generated APK not found or empty at: ${src.absolutePath}")
+    }
+  }
+}
+
+tasks.register<CopyDebugApkTask>("copyDebugApk") {
+  mustRunAfter("assembleDebug")
+  sourceApk.set(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
+  destinationApk.set(layout.projectDirectory.file("../ChatLeryyy.apk"))
+}
+
+tasks.matching { it.name == "assembleDebug" }.configureEach {
+  finalizedBy("copyDebugApk")
+}
