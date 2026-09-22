@@ -1,0 +1,6 @@
+{
+  "name": "ChatLeryyy",
+  "description": "Aplikasi messenger native realtime dengan fitur chat, pesan media, status online, dan panggilan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
